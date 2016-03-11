@@ -1,0 +1,5 @@
+# OSX generated files.
+.DS_Store
+
+# Configuration files.
+config.php

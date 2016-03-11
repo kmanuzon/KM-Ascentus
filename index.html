@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KM-Ascentus</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<style>
+.no-result {
+    list-style-type: none;
+}
+</style>
+</head>
+<body>
+<br>
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="q" class="col-sm-1 control-label">Search</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="q" name="q" placeholder="Type, Owner Name or Last Name, Phone, Eatery Name, City, State, or Zip Code.">
+        </div>
+    </div>
+</form>
+<ul id="result"></ul>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function() {
+    var $search = $('#q');
+    var $list = $('#result');
+    var throttle_search;
+    $search.on('change, input', function(e) {
+        // throttle search query.
+        // @see http://stackoverflow.com/a/8366068
+        clearTimeout(throttle_search);
+        throttle_search = setTimeout(searchRestaurants, 400);
+    });
+    function searchRestaurants() {
+        $.ajax({
+            url: 'search.php',
+            data: {q: $search.val()},
+            dataType: 'json',
+            success: displayResult,
+            error: function(jqXHR, textStatus, errorThrown) {
+                $list.empty();
+                alert(textStatus);
+            }
+        });
+    }
+    function displayResult(data) {
+        $list.empty();
+        if ( !data.length) {
+            $('<li class="no-result"/>').text('No result.').appendTo($list);
+            return;
+        }
+        for (var i in data) {
+            $list.append(
+                $('<li/>').text(data[i].name).append(
+                    $('<ul/>')
+                        .append(
+                            $('<li/>').text(
+                                'Owned by: '
+                                + data[i].first_name
+                                + ' '
+                                + data[i].last_name
+                                + ' | Phone: '
+                                + data[i].phone
+                            )
+                        )
+                        .append(
+                            $('<li/>').text(
+                                'Located in: '
+                                + data[i].city
+                                + ', '
+                                + data[i].state
+                                + ' '
+                                + data[i].zip
+                            )
+                        )
+                )
+            );
+        }
+    }
+});
+</script>
+</body>
+</html>
